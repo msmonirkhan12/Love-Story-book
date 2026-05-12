@@ -237,6 +237,80 @@
             margin-bottom: 18px;
         }
 
+        /* কনফার্মেশন ডায়ালগ */
+        .confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .confirm-dialog {
+            background: white;
+            border-radius: 20px;
+            padding: 30px 25px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: scaleIn 0.3s ease-out;
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0.9); }
+            to { transform: scale(1); }
+        }
+        .confirm-dialog h3 {
+            font-family: 'Georgia', serif;
+            color: #451a03;
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+        .confirm-dialog p {
+            color: #5b4b3a;
+            margin-bottom: 25px;
+            font-size: 1rem;
+        }
+        .confirm-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        .confirm-btn {
+            padding: 12px 28px;
+            border-radius: 40px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .btn-stay {
+            background: #fef3c7;
+            color: #b45309;
+            border: 2px solid #fbbf24;
+        }
+        .btn-stay:hover {
+            background: #fde68a;
+        }
+        .btn-leave {
+            background: #f59e0b;
+            color: white;
+        }
+        .btn-leave:hover {
+            background: #d97706;
+        }
+
         /* লোডার */
         .loader {
             text-align: center;
@@ -292,11 +366,23 @@
 <div id="storyModal" class="book-modal">
     <div class="book-page">
         <div class="book-page-header">
-            <button class="close-book" onclick="closeStoryBook()">✖</button>
+            <button class="close-book" id="closeBookBtn">✖</button>
             <h2 id="modalTitle">গল্পের শিরোনাম</h2>
         </div>
         <img id="modalImage" class="story-image" alt="গল্পের ছবি">
         <div id="modalStory" class="story-text"></div>
+    </div>
+</div>
+
+<!-- কনফার্মেশন ডায়ালগ -->
+<div id="confirmDialog" class="confirm-overlay" style="display: none;">
+    <div class="confirm-dialog">
+        <h3>📘 আপনি কি বাহির হতে চান?</h3>
+        <p>গল্পটি পড়া শেষ না হলে থেকে যেতে পারেন।</p>
+        <div class="confirm-buttons">
+            <button class="confirm-btn btn-stay" id="btnStay">📖 থাকতে চাই</button>
+            <button class="confirm-btn btn-leave" id="btnLeave">🚪 বাহির হতে চাই</button>
+        </div>
     </div>
 </div>
 
@@ -318,6 +404,7 @@
     const db = getFirestore(app);
 
     let allPoints = [];
+    let isStoryModalOpen = false; // ট্র্যাক রাখবে মোডাল খোলা আছে কিনা
 
     // কভার লোড (টেক্সট নেই, শুধু ছবি)
     async function loadCover() {
@@ -384,12 +471,84 @@
         document.getElementById('modalStory').innerHTML = `<p>${escapeHtml(storyHtml)}</p>`;
         modal.style.display = 'block';
         document.body.style.overflow = 'hidden';
+        
+        // ব্রাউজার হিস্টোরিতে একটি স্টেট যোগ করা (ব্যাক বাটনের জন্য)
+        isStoryModalOpen = true;
+        history.pushState({ storyModalOpen: true }, '', window.location.href);
+    }
+
+    // কনফার্মেশন ডায়ালগ দেখানো
+    function showConfirmDialog() {
+        document.getElementById('confirmDialog').style.display = 'flex';
+    }
+
+    // কনফার্মেশন ডায়ালগ লুকানো
+    function hideConfirmDialog() {
+        document.getElementById('confirmDialog').style.display = 'none';
+    }
+
+    // বাহির হতে চাইলে মোডাল বন্ধ করা
+    function confirmLeave() {
+        hideConfirmDialog();
+        closeStoryBookModal();
+    }
+
+    // মোডাল বন্ধ করার ফাংশন (কনফার্মেশন ছাড়া)
+    function closeStoryBookModal() {
+        const modal = document.getElementById('storyModal');
+        if (modal.style.display === 'block') {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            isStoryModalOpen = false;
+            
+            // হিস্টোরি থেকে আমাদের যোগ করা স্টেট রিমুভ করা
+            if (history.state && history.state.storyModalOpen) {
+                history.back();
+            }
+        }
     }
 
     window.closeStoryBook = function() {
-        document.getElementById('storyModal').style.display = 'none';
-        document.body.style.overflow = 'auto';
+        showConfirmDialog();
     };
+
+    // ব্যাক বাটন হ্যান্ডলার
+    window.addEventListener('popstate', function(event) {
+        if (isStoryModalOpen) {
+            // ব্যাক বাটন প্রেস করলে কনফার্মেশন ডায়ালগ দেখাবে
+            showConfirmDialog();
+            
+            // আবার হিস্টোরিতে স্টেট যোগ করে দিচ্ছি যাতে ইউজার পরের বার আবার ব্যাক চাপলে কাজ করে
+            history.pushState({ storyModalOpen: true }, '', window.location.href);
+        }
+    });
+
+    // ইভেন্ট লিসেনার সেটআপ
+    document.addEventListener('DOMContentLoaded', function() {
+        // ক্লোজ বাটনে ক্লিক করলে কনফার্মেশন দেখাবে
+        document.getElementById('closeBookBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            showConfirmDialog();
+        });
+
+        // থাকতে চাই বাটন
+        document.getElementById('btnStay').addEventListener('click', function() {
+            hideConfirmDialog();
+            // হিস্টোরি স্টেট ঠিক রাখা (ইতিমধ্যেই আছে)
+        });
+
+        // বাহির হতে চাই বাটন
+        document.getElementById('btnLeave').addEventListener('click', function() {
+            confirmLeave();
+        });
+
+        // ওভারলে-তে ক্লিক করলে কিছু হবে না
+        document.getElementById('confirmDialog').addEventListener('click', function(e) {
+            if (e.target === this) {
+                // কিছু করবে না
+            }
+        });
+    });
 
     function escapeHtml(str) {
         if (!str) return '';
