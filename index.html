@@ -1,567 +1,680 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>📖বাস্তব গল্প |অসমাপ্ত এক প্রেমের কাহিনী </title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+<title>গল্পের বই - অসমাপ্ত প্রেমের কাহিনী</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-        body {
-            background: #faf6e9;
-            font-family: 'Segoe UI', 'Georgia', 'Times New Roman', serif;
-            min-height: 100vh;
-        }
+:root {
+  --bg: #f5f0e8;
+  --page-bg: #fffef7;
+  --text: #1a1a2e;
+  --text-soft: #2d2d44;
+  --header: #111;
+  --border: #e0d6c8;
+  --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  --accent: #c97e0f;
+}
 
-        /* কাভার সেকশন – শুধু ছবি, কোনো ওভারলে নয় */
-        .book-cover {
-            width: 100%;
-            height: 400px;
-            overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-        }
-        .book-cover img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+body.dark {
+  --bg: #121212;
+  --page-bg: #1e1e2e;
+  --text: #e8eef2;
+  --text-soft: #c0c8d0;
+  --header: #f0c674;
+  --border: #2a2a3a;
+}
 
-        /* বইয়ের নাম – ফটোর নিচে বড় অক্ষরে */
-        .book-title-section {
-            text-align: center;
-            padding: 30px 20px 10px;
-            background: #faf6e9;
-        }
-        .book-title-section h1 {
-            font-size: 2.8rem;
-            font-family: 'Georgia', serif;
-            color: #451a03;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-            font-weight: 800;
-        }
-        .book-title-section p {
-            font-size: 1.2rem;
-            color: #b45309;
-            font-style: italic;
-            border-top: 2px solid #fbbf24;
-            display: inline-block;
-            padding-top: 10px;
-        }
+body {
+  font-family: 'Segoe UI', 'Noto Sans Bengali', 'Times New Roman', 'Georgia', serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  transition: all 0.2s;
+}
 
-        /* বুকমার্ক নেভিগেশন */
-        .book-header {
-            max-width: 850px;
-            margin: 25px auto 15px;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            flex-wrap: wrap;
-        }
-        .page-count {
-            color: #b45309;
-            font-size: 0.9rem;
-            font-weight: 500;
-            background: #ffedd5;
-            padding: 6px 15px;
-            border-radius: 30px;
-        }
+.offline-indicator {
+  background: #6b7280;
+  color: white;
+  padding: 5px;
+  text-align: center;
+  font-size: 12px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1001;
+  display: none;
+}
+.offline-indicator.show { display: block; }
 
-        /* পয়েন্ট কন্টেইনার - বইয়ের পাতা */
-        .book-pages {
-            max-width: 850px;
-            margin: 0 auto;
-            padding: 10px 20px 60px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+.status-bar {
+  background: var(--accent);
+  color: white;
+  padding: 10px;
+  text-align: center;
+  font-size: 13px;
+  position: fixed;
+  top: 25px;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: none;
+  font-weight: bold;
+}
 
-        /* প্রতিটি গল্প = অধ্যায় */
-        .chapter-card {
-            background: white;
-            border-radius: 16px;
-            padding: 22px 26px;
-            cursor: pointer;
-            transition: all 0.35s ease;
-            position: relative;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
-            border: 1px solid #fde68a;
-        }
+/* কাভার ফটো - একদাম উপরে, কোনো ফাঁকা জায়গা নেই */
+.cover {
+  width: 100%;
+  height: 380px;
+  overflow: hidden;
+  background: #d4c9b0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-        /* হরিজন্টাল লাইন */
-        .chapter-card::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 5%;
-            width: 90%;
-            height: 2px;
-            background: linear-gradient(90deg, #f59e0b, #fcd34d, #f59e0b);
-            border-radius: 2px;
-            transition: all 0.3s;
-        }
+.bookTitle {
+  padding: 30px 20px;
+  text-align: center;
+  background: linear-gradient(to bottom, var(--page-bg), var(--bg));
+  border-bottom: 1px solid var(--border);
+}
+.bookTitle h1 {
+  font-size: 40px;
+  margin-bottom: 10px;
+  color: var(--header);
+  font-weight: bold;
+}
+.bookTitle p {
+  font-size: 20px;
+  color: var(--text-soft);
+}
 
-        .chapter-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 15px 30px -12px rgba(245, 158, 11, 0.25);
-            border-color: #fbbf24;
-        }
+.chapterContainer {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 20px 16px 100px 16px;
+  background: var(--page-bg);
+}
 
-        .chapter-card:hover::after {
-            width: 96%;
-            left: 2%;
-            height: 3px;
-        }
+/* চিকন কার্ড */
+.chapterCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  border-radius: 16px;
+  background: var(--page-bg);
+  border-left: 6px solid;
+  box-shadow: var(--card-shadow);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  min-height: 85px;
+}
+.chapterCard:active { transform: scale(0.98); }
 
-        .chapter-number {
-            display: inline-block;
-            background: #fef3c7;
-            color: #b45309;
-            padding: 4px 14px;
-            border-radius: 30px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
+.chapterCard[data-chapter="1"] { border-left-color: #e74c3c; background: #fffaf5; }
+.chapterCard[data-chapter="2"] { border-left-color: #2980b9; background: #f5faff; }
+.chapterCard[data-chapter="3"] { border-left-color: #27ae60; background: #f5fff5; }
+.chapterCard[data-chapter="4"] { border-left-color: #8e44ad; background: #faf5ff; }
+.chapterCard[data-chapter="5"] { border-left-color: #e67e22; background: #fff8f0; }
+.chapterCard[data-chapter="6"] { border-left-color: #d35400; background: #fff5ee; }
+.chapterCard[data-chapter="7"] { border-left-color: #1abc9c; background: #f0faf7; }
+.chapterCard[data-chapter="8"] { border-left-color: #f39c12; background: #fffcf0; }
+.chapterCard[data-chapter="9"] { border-left-color: #9b59b6; background: #f9f0ff; }
+.chapterCard[data-chapter="10"] { border-left-color: #f1c40f; background: #fffef0; }
 
-        .chapter-title {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #451a03;
-            font-family: 'Georgia', serif;
-            margin-bottom: 10px;
-            letter-spacing: -0.3px;
-        }
+body.dark .chapterCard {
+  background: var(--page-bg);
+  border-left-color: var(--accent);
+}
 
-        .chapter-summary {
-            color: #5b4b3a;
-            line-height: 1.5;
-            font-size: 0.95rem;
-            padding-left: 8px;
-            border-left: 3px solid #fbbf24;
-        }
+.chapterNumber {
+  font-size: 12px;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+.chapterTitle {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 6px;
+  line-height: 1.3;
+  color: var(--text);
+}
+.chapterSummary {
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text-soft);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
-        /* 📖 বইয়ের মতন মোডাল (গল্প পড়ার পেজ) */
-        .book-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #2c241a;
-            z-index: 2000;
-            overflow-y: auto;
-            display: none;
-            padding: 20px;
-        }
+/* মোডাল (গল্প পড়ার অংশ) */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.9);
+  display: none;
+  overflow: auto;
+  padding: 15px;
+  z-index: 9999;
+}
+.modalContent {
+  background: var(--page-bg);
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border-radius: 0;
+  min-height: 100%;
+  overflow: hidden;
+}
+.modalHeader {
+  padding: 20px 25px;
+  background: linear-gradient(135deg, var(--accent), #b46b0a);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.modalHeader h2 {
+  font-size: 32px;
+  font-weight: bold;
+}
+.closeBtn {
+  background: #9b2e1f;
+  border: none;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 40px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+}
+.closeBtn:active { transform: scale(0.95); }
 
-        .book-page {
-            max-width: 700px;
-            margin: 30px auto;
-            background: #fffef7;
-            border-radius: 24px;
-            box-shadow: 0 25px 50px -12px black;
-            overflow: hidden;
-            position: relative;
-            animation: bookOpen 0.4s ease-out;
-        }
+.storyArea {
+  padding: 35px 25px;
+}
+.storyPoint {
+  margin-bottom: 40px;
+}
+.storyPoint p {
+  font-size: 26px;
+  line-height: 2.1;
+  color: var(--text);
+  margin-bottom: 15px;
+  text-align: justify;
+  font-weight: 500;
+}
+.storyPoint img {
+  width: 100%;
+  margin-top: 18px;
+  border-radius: 18px;
+  max-height: 400px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 
-        @keyframes bookOpen {
-            from {
-                opacity: 0;
-                transform: scale(0.96) translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
+.error-box {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 40px;
+  border-radius: 24px;
+  text-align: center;
+  margin: 20px;
+}
+.retry-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 40px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 15px;
+}
 
-        .book-page-header {
-            background: #fef3c7;
-            padding: 20px 28px;
-            border-bottom: 2px solid #fde68a;
-            position: relative;
-        }
+.loading-spinner {
+  text-align: center;
+  padding: 60px 20px;
+}
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e0d6c8;
+  border-top: 4px solid var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 18px;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 
-        .book-page-header h2 {
-            font-size: 2rem;
-            color: #78350f;
-            font-family: 'Georgia', serif;
-        }
+.refresh-fab {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  background: linear-gradient(135deg, var(--accent), #b46b0a);
+  color: white;
+  width: 55px;
+  height: 55px;
+  border-radius: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 28px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 100;
+}
+.dark-toggle {
+  position: fixed;
+  bottom: 95px;
+  right: 25px;
+  background: #2c3e50;
+  color: white;
+  width: 55px;
+  height: 55px;
+  border-radius: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 28px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 100;
+}
+.refresh-fab:active, .dark-toggle:active {
+  transform: scale(0.94);
+}
 
-        .close-book {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #f59e0b;
-            border: none;
-            color: white;
-            width: 44px;
-            height: 44px;
-            border-radius: 44px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: 0.2s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
+/* কনফার্ম বক্স */
+.confirm-box {
+  position: fixed;
+  bottom: 35%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a2e;
+  color: white;
+  padding: 20px 25px;
+  border-radius: 28px;
+  text-align: center;
+  z-index: 10001;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  width: 280px;
+  font-family: inherit;
+}
+.confirm-box p {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+.confirm-btn {
+  background: var(--accent);
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  margin: 0 8px;
+  border-radius: 40px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.confirm-btn.cancel {
+  background: #6b7280;
+}
+.confirm-btn:active { transform: scale(0.96); }
 
-        .close-book:hover {
-            background: #d97706;
-            transform: scale(1.05);
-        }
-
-        .story-image {
-            width: 100%;
-            max-height: 380px;
-            object-fit: cover;
-            border-bottom: 1px solid #fde68a;
-        }
-
-        .story-text {
-            padding: 28px 32px;
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: #2c241a;
-            font-family: 'Georgia', serif;
-            text-align: justify;
-        }
-
-        .story-text p {
-            margin-bottom: 18px;
-        }
-
-        /* কনফার্মেশন ডায়ালগ */
-        .confirm-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            z-index: 3000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.2s ease-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .confirm-dialog {
-            background: white;
-            border-radius: 20px;
-            padding: 30px 25px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            animation: scaleIn 0.3s ease-out;
-        }
-        @keyframes scaleIn {
-            from { transform: scale(0.9); }
-            to { transform: scale(1); }
-        }
-        .confirm-dialog h3 {
-            font-family: 'Georgia', serif;
-            color: #451a03;
-            margin-bottom: 10px;
-            font-size: 1.4rem;
-        }
-        .confirm-dialog p {
-            color: #5b4b3a;
-            margin-bottom: 25px;
-            font-size: 1rem;
-        }
-        .confirm-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-        .confirm-btn {
-            padding: 12px 28px;
-            border-radius: 40px;
-            border: none;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            font-family: 'Segoe UI', sans-serif;
-        }
-        .btn-stay {
-            background: #fef3c7;
-            color: #b45309;
-            border: 2px solid #fbbf24;
-        }
-        .btn-stay:hover {
-            background: #fde68a;
-        }
-        .btn-leave {
-            background: #f59e0b;
-            color: white;
-        }
-        .btn-leave:hover {
-            background: #d97706;
-        }
-
-        /* লোডার */
-        .loader {
-            text-align: center;
-            padding: 60px;
-            color: #b45309;
-            font-size: 1.2rem;
-        }
-
-        /* responsive */
-        @media (max-width: 640px) {
-            .book-cover { height: 280px; }
-            .book-title-section h1 { font-size: 1.8rem; }
-            .chapter-title { font-size: 1.3rem; }
-            .chapter-card { padding: 16px 18px; }
-            .story-text { padding: 20px; font-size: 1rem; }
-            .book-page-header h2 { font-size: 1.5rem; }
-        }
-
-        /* মসৃণ স্ক্রল */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #fef3c7;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #f59e0b;
-            border-radius: 10px;
-        }
-    </style>
+/* মোবাইলের জন্য */
+@media (max-width: 768px) {
+  .chapterTitle { font-size: 18px; }
+  .chapterSummary { font-size: 13px; }
+  .storyPoint p { font-size: 23px; line-height: 2; }
+  .bookTitle h1 { font-size: 28px; }
+  .bookTitle p { font-size: 16px; }
+  .modalHeader h2 { font-size: 24px; }
+  .closeBtn { padding: 6px 16px; font-size: 14px; }
+  .storyArea { padding: 25px 18px; }
+  .chapterContainer { padding: 16px 14px 90px 14px; }
+  .chapterCard { padding: 10px 14px; min-height: 75px; margin-bottom: 10px; }
+  .cover { height: 250px; }
+  .confirm-box { width: 260px; padding: 18px 20px; bottom: 30%; }
+  .confirm-box p { font-size: 16px; }
+}
+</style>
 </head>
 <body>
 
-<!-- কাভার ফটো – শুধু ছবি -->
-<div id="coverContainer" class="book-cover"></div>
+<div id="offlineIndicator" class="offline-indicator">⚠️ আপনি অফলাইনে আছেন</div>
+<div id="statusBar" class="status-bar">🔄 সংযোগ স্থাপন হচ্ছে...</div>
 
-<!-- বইয়ের নাম – ফটোর নিচে বড় অক্ষরে -->
-<div class="book-title-section">
-    <h1>📘 অসমাপ্ত এক প্রেমের কাহিনী  বই</h1>
-    <p>গল্পের ৫৪+টি অধ্যায় • হৃদয়ের পাতা থেকে</p>
+<!-- কাভার ফটো - একদম উপরে, কোনো ফাঁকা জায়গা নেই -->
+<div class="cover"><img id="coverImg" src="https://i.postimg.cc/sgMY6zQk/295802e1-8822-4ed6-940e-66e89df7092e-picsay.jpg" alt="cover"></div>
+<div class="bookTitle"><h1 id="bookTitleH1">📖 অসমাপ্ত এক প্রেমের কাহিনী</h1><p id="bookSub">১০টি অধ্যায়ের বাস্তব গল্প</p></div>
+
+<div class="chapterContainer" id="chapterContainer"><div class="loading-spinner"><div class="spinner"></div><p>অধ্যায় লোড হচ্ছে...</p></div></div>
+
+<button class="dark-toggle" id="darkToggle" onclick="toggleDarkMode()">🌙</button>
+<div class="refresh-fab" onclick="manualRefresh()">🔄</div>
+
+<div class="modal" id="storyModal">
+<div class="modalContent">
+<div class="modalHeader"><h2 id="modalTitle">গল্প</h2><button class="closeBtn" onclick="closeModal()">✕ বন্ধ</button></div>
+<div class="storyArea" id="storyArea"></div>
+</div>
 </div>
 
-<div class="book-header">
-    <span class="page-count">📖 ৫৪+টি প্রেমের অধ্যায়</span>
-    <span class="page-count">🖋️📜লেখক=এম এস মনির খান </span>
-</div>
+<script>
+let isOnline = navigator.onLine;
+let isModalOpen = false;
 
-<div id="pointsList" class="book-pages">
-    <div class="loader">✨ গল্পের পাতা উল্টানো হচ্ছে...</div>
-</div>
+// কনফার্ম বক্স ফাংশন
+function showConfirm(message, onYes) {
+  const existing = document.querySelector('.confirm-box');
+  if(existing) existing.remove();
+  
+  const box = document.createElement('div');
+  box.className = 'confirm-box';
+  box.innerHTML = `
+    <p>${message}</p>
+    <button class="confirm-btn" id="confirmYes">🚪 বাইরে যান</button>
+    <button class="confirm-btn cancel" id="confirmNo">📖 গল্পে থাকুন</button>
+  `;
+  document.body.appendChild(box);
+  
+  document.getElementById('confirmYes').onclick = () => {
+    box.remove();
+    onYes();
+  };
+  document.getElementById('confirmNo').onclick = () => {
+    box.remove();
+  };
+}
 
-<!-- বইয়ের মতন মোডাল -->
-<div id="storyModal" class="book-modal">
-    <div class="book-page">
-        <div class="book-page-header">
-            <button class="close-book" id="closeBookBtn">✖</button>
-            <h2 id="modalTitle">গল্পের শিরোনাম</h2>
-        </div>
-        <img id="modalImage" class="story-image" alt="গল্পের ছবি">
-        <div id="modalStory" class="story-text"></div>
-    </div>
-</div>
-
-<!-- কনফার্মেশন ডায়ালগ -->
-<div id="confirmDialog" class="confirm-overlay" style="display: none;">
-    <div class="confirm-dialog">
-        <h3>📘 আপনি কি বাহির হতে চান?</h3>
-        <p>গল্পটি পড়া শেষ না হলে থেকে যেতে পারেন।</p>
-        <div class="confirm-buttons">
-            <button class="confirm-btn btn-stay" id="btnStay">📖 থাকতে চাই</button>
-            <button class="confirm-btn btn-leave" id="btnLeave">🚪 বাহির হতে চাই</button>
-        </div>
-    </div>
-</div>
-
-<script type="module">
-    // Firebase Config (আপনার দেওয়া)
-    const firebaseConfig = {
-        apiKey: "AIzaSyAxvsVxn0RsSi2AYEUaOXEbgYnTZSIkLc4",
-        authDomain: "love-story-f4fd0.firebaseapp.com",
-        projectId: "love-story-f4fd0",
-        storageBucket: "love-story-f4fd0.firebasestorage.app",
-        messagingSenderId: "919425405740",
-        appId: "1:919425405740:web:bc0ac3332f0daab45fd289"
-    };
-
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    let allPoints = [];
-    let isStoryModalOpen = false; // ট্র্যাক রাখবে মোডাল খোলা আছে কিনা
-
-    // কভার লোড (টেক্সট নেই, শুধু ছবি)
-    async function loadCover() {
-        const coverDiv = document.getElementById('coverContainer');
-        try {
-            const settingsRef = doc(db, "appSettings", "cover");
-            const docSnap = await getDoc(settingsRef);
-            if (docSnap.exists() && docSnap.data().coverUrl) {
-                coverDiv.innerHTML = `<img src="${docSnap.data().coverUrl}" alt="বইয়ের কভার">`;
-            } else {
-                coverDiv.innerHTML = `<div style="background:#f59e0b; height:100%; display:flex; align-items:center; justify-content:center;"><h2 style="color:white;">❤️ প্রেমের গল্প</h2></div>`;
-            }
-        } catch(e) { console.warn(e); }
+function exitApp() {
+  try {
+    if (typeof navigator !== 'undefined' && navigator.app && navigator.app.exitApp) {
+      navigator.app.exitApp();
+    } else if (typeof window !== 'undefined' && window.close) {
+      window.close();
     }
+  } catch(e) {
+    console.log("Exit error:", e);
+  }
+}
 
-    // পয়েন্ট লোড
-    async function loadPoints() {
-        const container = document.getElementById('pointsList');
-        container.innerHTML = '<div class="loader">📚 গল্পের সূচি তৈরি হচ্ছে...</div>';
-        try {
-            const q = query(collection(db, "points"), orderBy("order", "asc"));
-            const snapshot = await getDocs(q);
-            if (snapshot.empty) {
-                container.innerHTML = '<div class="loader">📭 এখনো কোনো গল্প যোগ করা হয়নি। অ্যাডমিন প্যানেল থেকে প্রথম গল্প লিখুন।</div>';
-                return;
-            }
-            allPoints = [];
-            snapshot.forEach(doc => allPoints.push({ id: doc.id, ...doc.data() }));
-            renderChapters(allPoints);
-        } catch(err) {
-            container.innerHTML = `<div class="loader">⚠️ সংযোগ ত্রুটি: ${err.message}</div>`;
-        }
-    }
-
-    function renderChapters(points) {
-        const container = document.getElementById('pointsList');
-        if (!points.length) return;
-        container.innerHTML = '';
-        points.forEach((point, idx) => {
-            const card = document.createElement('div');
-            card.className = 'chapter-card';
-            card.innerHTML = `
-                <div class="chapter-number">অধ্যায় ${idx+1}</div>
-                <div class="chapter-title">${escapeHtml(point.title || 'অজানা গল্প')}</div>
-                <div class="chapter-summary">${escapeHtml(point.summary || 'ক্লিক করে পুরো অধ্যায় পড়ুন')}</div>
-            `;
-            card.addEventListener('click', () => openStoryBook(point));
-            container.appendChild(card);
-        });
-    }
-
-    function openStoryBook(point) {
-        const modal = document.getElementById('storyModal');
-        document.getElementById('modalTitle').innerHTML = point.title || 'প্রিয় গল্প';
-        const img = document.getElementById('modalImage');
-        if (point.imageUrl && point.imageUrl.trim() !== '') {
-            img.src = point.imageUrl;
-            img.style.display = 'block';
-        } else {
-            img.style.display = 'none';
-        }
-        let storyHtml = (point.story || 'এই গল্পটি শীঘ্রই লেখা হবে।');
-        storyHtml = storyHtml.replace(/\n/g, '<br>');
-        document.getElementById('modalStory').innerHTML = `<p>${escapeHtml(storyHtml)}</p>`;
-        modal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
-        
-        // ব্রাউজার হিস্টোরিতে একটি স্টেট যোগ করা (ব্যাক বাটনের জন্য)
-        isStoryModalOpen = true;
-        history.pushState({ storyModalOpen: true }, '', window.location.href);
-    }
-
-    // কনফার্মেশন ডায়ালগ দেখানো
-    function showConfirmDialog() {
-        document.getElementById('confirmDialog').style.display = 'flex';
-    }
-
-    // কনফার্মেশন ডায়ালগ লুকানো
-    function hideConfirmDialog() {
-        document.getElementById('confirmDialog').style.display = 'none';
-    }
-
-    // বাহির হতে চাইলে মোডাল বন্ধ করা
-    function confirmLeave() {
-        hideConfirmDialog();
-        closeStoryBookModal();
-    }
-
-    // মোডাল বন্ধ করার ফাংশন (কনফার্মেশন ছাড়া)
-    function closeStoryBookModal() {
-        const modal = document.getElementById('storyModal');
-        if (modal.style.display === 'block') {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-            isStoryModalOpen = false;
-            
-            // হিস্টোরি থেকে আমাদের যোগ করা স্টেট রিমুভ করা
-            if (history.state && history.state.storyModalOpen) {
-                history.back();
-            }
-        }
-    }
-
-    window.closeStoryBook = function() {
-        showConfirmDialog();
-    };
-
-    // ব্যাক বাটন হ্যান্ডলার
-    window.addEventListener('popstate', function(event) {
-        if (isStoryModalOpen) {
-            // ব্যাক বাটন প্রেস করলে কনফার্মেশন ডায়ালগ দেখাবে
-            showConfirmDialog();
-            
-            // আবার হিস্টোরিতে স্টেট যোগ করে দিচ্ছি যাতে ইউজার পরের বার আবার ব্যাক চাপলে কাজ করে
-            history.pushState({ storyModalOpen: true }, '', window.location.href);
-        }
+function handleBackButton() {
+  if (isModalOpen) {
+    closeModal();
+    showToast('📖 গল্প বন্ধ করা হয়েছে', 1500);
+    return true;
+  } else {
+    showConfirm('⚠️ আপনি কি অ্যাপ থেকে বের হতে চান?', () => {
+      showToast('👋 বিদায়! আবার আসবেন', 1000);
+      setTimeout(() => exitApp(), 300);
     });
+    return true;
+  }
+}
 
-    // ইভেন্ট লিসেনার সেটআপ
-    document.addEventListener('DOMContentLoaded', function() {
-        // ক্লোজ বাটনে ক্লিক করলে কনফার্মেশন দেখাবে
-        document.getElementById('closeBookBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            showConfirmDialog();
-        });
+function showToast(message, duration = 2000) {
+  const oldToast = document.querySelector('.toast-msg');
+  if(oldToast) oldToast.remove();
+  
+  const toast = document.createElement('div');
+  toast.className = 'toast-msg';
+  toast.textContent = message;
+  toast.style.cssText = 'position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:#1a1a2e; color:white; padding:12px 24px; border-radius:50px; font-size:16px; z-index:10000; white-space:nowrap; box-shadow:0 4px 15px rgba(0,0,0,0.3); animation:fadeOut 2s ease forwards; pointer-events:none;';
+  document.body.appendChild(toast);
+  
+  setTimeout(() => { if(toast && toast.parentNode) toast.remove(); }, duration);
+}
 
-        // থাকতে চাই বাটন
-        document.getElementById('btnStay').addEventListener('click', function() {
-            hideConfirmDialog();
-            // হিস্টোরি স্টেট ঠিক রাখা (ইতিমধ্যেই আছে)
-        });
-
-        // বাহির হতে চাই বাটন
-        document.getElementById('btnLeave').addEventListener('click', function() {
-            confirmLeave();
-        });
-
-        // ওভারলে-তে ক্লিক করলে কিছু হবে না
-        document.getElementById('confirmDialog').addEventListener('click', function(e) {
-            if (e.target === this) {
-                // কিছু করবে না
-            }
-        });
+function openStory(data) {
+  isModalOpen = true;
+  const modal = document.getElementById('storyModal');
+  const area = document.getElementById('storyArea');
+  document.getElementById('modalTitle').innerText = data.title || 'গল্প';
+  area.innerHTML = '';
+  
+  if(data.points && Array.isArray(data.points) && data.points.length > 0) {
+    data.points.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'storyPoint';
+      let imgHtml = '';
+      if(item.image && item.image.trim()) imgHtml = `<img src="${item.image}" onerror="this.style.display='none'">`;
+      const para = document.createElement('p');
+      para.innerHTML = escapeHtml(item.text || '');
+      div.appendChild(para);
+      if(imgHtml) div.insertAdjacentHTML('beforeend', imgHtml);
+      area.appendChild(div);
     });
+  } else {
+    area.innerHTML = '<p style="padding:30px; font-size:26px;">📝 এই অধ্যায়ে এখনো গল্প যোগ করা হয়নি</p>';
+  }
+  modal.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
 
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
+function closeModal() {
+  isModalOpen = false;
+  document.getElementById('storyModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+
+function updateOfflineStatus() {
+  const ind = document.getElementById('offlineIndicator');
+  if (!navigator.onLine) ind.classList.add('show');
+  else ind.classList.remove('show');
+  isOnline = navigator.onLine;
+}
+
+window.addEventListener('online', () => { updateOfflineStatus(); showStatus('📡 অনলাইন হয়েছে'); loadData(true); });
+window.addEventListener('offline', () => { updateOfflineStatus(); showStatus('📴 অফলাইন মোড', true); });
+
+function showStatus(msg, isError = false) {
+  const bar = document.getElementById('statusBar');
+  bar.textContent = msg;
+  bar.style.display = 'block';
+  bar.style.background = isError ? '#6b7280' : '#c97e0f';
+  setTimeout(() => { bar.style.display = 'none'; }, 2500);
+}
+
+function saveToLocal(data) {
+  try {
+    localStorage.setItem('book_chapters', JSON.stringify(data.chapters));
+    localStorage.setItem('book_settings', JSON.stringify(data.settings));
+    localStorage.setItem('book_timestamp', Date.now().toString());
+    return true;
+  } catch(e) { return false; }
+}
+
+function loadFromLocal() {
+  try {
+    const chapters = localStorage.getItem('book_chapters');
+    const settings = localStorage.getItem('book_settings');
+    const timestamp = localStorage.getItem('book_timestamp');
+    if(chapters && timestamp) {
+      let cacheValidDays = isOnline ? 1 : 7;
+      if(Date.now() - parseInt(timestamp) < cacheValidDays * 24 * 60 * 60 * 1000) {
+        return { chapters: JSON.parse(chapters), settings: settings ? JSON.parse(settings) : null };
+      }
     }
+  } catch(e) {}
+  return null;
+}
 
-    loadCover();
-    loadPoints();
+async function loadFromFirebase() {
+  if (!navigator.onLine) return null;
+  showStatus('🔄 ডাটা লোড হচ্ছে...');
+  try {
+    const projectId = 'ms-books-love';
+    const chaptersUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/chapters`;
+    const res = await fetch(chaptersUrl);
+    if(res.ok) {
+      const data = await res.json();
+      const chapters = [];
+      if(data.documents) {
+        for(const doc of data.documents) {
+          const ch = {};
+          for(const [key, val] of Object.entries(doc.fields || {})) {
+            if(val.stringValue) ch[key] = val.stringValue;
+            else if(val.integerValue) ch[key] = parseInt(val.integerValue);
+            else if(val.arrayValue) {
+              ch[key] = (val.arrayValue.values || []).map(v => {
+                const obj = {};
+                for(const [k, vv] of Object.entries(v.mapValue?.fields || {})) obj[k] = vv.stringValue || '';
+                return obj;
+              });
+            }
+          }
+          ch.id = doc.name.split('/').pop();
+          chapters.push(ch);
+        }
+      }
+      chapters.sort((a,b) => (a.chapter||0) - (b.chapter||0));
+      let settings = null;
+      const setUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/settings/appearance`;
+      const setRes = await fetch(setUrl);
+      if(setRes.ok){
+        const setData = await setRes.json();
+        settings = {};
+        for(const [key, val] of Object.entries(setData.fields || {})) if(val.stringValue) settings[key] = val.stringValue;
+      }
+      return { chapters, settings };
+    }
+  } catch(e) { console.log('API error:', e); }
+  return null;
+}
+
+function escapeHtml(text) {
+  if(!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function updateUI(data) {
+  if(!data) return false;
+  if(data.settings) {
+    const s = data.settings;
+    if(s.bookTitle) document.getElementById('bookTitleH1').innerHTML = s.bookTitle;
+    if(s.bookSubtitle) document.getElementById('bookSub').innerHTML = s.bookSubtitle;
+    if(s.coverUrl) document.getElementById('coverImg').src = s.coverUrl;
+    if(s.siteTitle) document.title = s.siteTitle;
+  }
+  const container = document.getElementById('chapterContainer');
+  if(!data.chapters || data.chapters.length === 0) {
+    container.innerHTML = `<div class="error-box">📖 কোনো অধ্যায় নেই<br><button class="retry-btn" onclick="forceReload()">🔄 রিফ্রেশ</button></div>`;
+    return true;
+  }
+  container.innerHTML = '';
+  data.chapters.forEach(chapter => {
+    const card = document.createElement('div');
+    card.className = 'chapterCard';
+    const chNum = chapter.chapter || 1;
+    card.setAttribute('data-chapter', chNum);
+    card.innerHTML = `<div class="chapterNumber">📖 অধ্যায় ${chNum}</div>
+                      <div class="chapterTitle">${escapeHtml(chapter.title || '')}</div>
+                      <div class="chapterSummary">${escapeHtml(chapter.summary || 'বিস্তারিত দেখতে ক্লিক করুন...')}</div>`;
+    card.onclick = () => openStory(chapter);
+    container.appendChild(card);
+  });
+  return true;
+}
+
+window.manualRefresh = function() {
+  if (!navigator.onLine) { showStatus('⚠️ অফলাইনে রিফ্রেশ করা যাবে না', true); return; }
+  showStatus('🔄 রিফ্রেশ করা হচ্ছে...');
+  loadData(true);
+}
+
+window.forceReload = function() { localStorage.clear(); loadData(true); }
+
+function toggleDarkMode() {
+  document.body.classList.toggle('dark');
+  const btn = document.getElementById('darkToggle');
+  if(document.body.classList.contains('dark')) { btn.innerHTML = '☀️'; localStorage.setItem('darkMode', 'true'); }
+  else { btn.innerHTML = '🌙'; localStorage.setItem('darkMode', 'false'); }
+}
+
+async function loadData(forceFresh = false) {
+  let data = null;
+  if(!forceFresh) {
+    data = loadFromLocal();
+    if(data) updateUI(data);
+  }
+  if(navigator.onLine) {
+    try {
+      const freshData = await loadFromFirebase();
+      if(freshData && freshData.chapters && freshData.chapters.length > 0) {
+        updateUI(freshData);
+        saveToLocal(freshData);
+        showStatus('✅ নতুন ডাটা লোড হয়েছে');
+      } else if(!data) {
+        document.getElementById('chapterContainer').innerHTML = `<div class="error-box">❌ সংযোগ সমস্যা<br><button class="retry-btn" onclick="forceReload()">পুনরায় চেষ্টা</button></div>`;
+      }
+    } catch(e) { if(!data) showStatus('⚠️ সংযোগ সমস্যা', true); }
+  }
+  updateOfflineStatus();
+  if(localStorage.getItem('darkMode') === 'true') { document.body.classList.add('dark'); document.getElementById('darkToggle').innerHTML = '☀️'; }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  updateOfflineStatus();
+  loadData(false);
+  
+  if (typeof document !== 'undefined') {
+    document.addEventListener('backbutton', function(e) {
+      e.preventDefault();
+      handleBackButton();
+      return false;
+    }, false);
+    
+    window.addEventListener('popstate', function(e) {
+      if (!isModalOpen) {
+        e.preventDefault();
+        handleBackButton();
+        history.pushState(null, null, location.href);
+      } else {
+        closeModal();
+        showToast('📖 গল্প বন্ধ', 1000);
+      }
+    });
+    history.pushState(null, null, location.href);
+  }
+});
+
+const style = document.createElement('style');
+style.textContent = `@keyframes fadeOut { 0% { opacity: 1; bottom: 100px; } 70% { opacity: 1; bottom: 100px; } 100% { opacity: 0; bottom: 80px; visibility: hidden; } }`;
+document.head.appendChild(style);
 </script>
 </body>
 </html>
